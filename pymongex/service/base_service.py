@@ -22,19 +22,19 @@ class BaseService:
         """
 
         def convert_value(field_type, value: str):
-            if field_type == int:
+            if field_type is int:
                 return int(value)
-            elif field_type == float:
+            elif field_type is float:
                 return float(value)
-            elif field_type == bool:
+            elif field_type is bool:
                 return value.lower() in ["true", "1", "yes"]
-            elif field_type == str:
+            elif field_type is str:
                 return value
             # check if field type is enum
             elif issubclass(field_type, BaseEnum):
                 return field_type(value).value
             # check if field type is PyObjectId -> convert to ObjectId
-            elif field_type == ObjectId or field_type == PyObjectId:
+            elif field_type is ObjectId or field_type is PyObjectId:
                 return ObjectId(value)
             else:
                 raise ValueError(f"Unsupported field type: {field_type}")

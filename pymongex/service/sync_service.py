@@ -1,4 +1,4 @@
-from typing import Any, List, Type, Union
+from typing import Any, List, Optional, Type, Union
 
 from bson import ObjectId
 from pydantic import BaseModel
@@ -48,7 +48,7 @@ class SyncBaseService(BaseService):
         sort: dict = None,
         expand: list[str] = None,
         skip: int = 0,
-    ) -> OutCollectionModel | None:
+    ) -> Optional[OutCollectionModel]:
         return cls._mongo_client.find_one(
             cls._out_model,
             query,
@@ -62,7 +62,7 @@ class SyncBaseService(BaseService):
         cls,
         id: Union[str, ObjectId],
         expand: list[str] = None,
-    ) -> OutCollectionModel | None:
+    ) -> Optional[OutCollectionModel]:
         return cls.get_one({"_id": ObjectId(id)}, expand=expand)
 
     @classmethod
