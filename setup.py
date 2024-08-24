@@ -6,12 +6,9 @@ setup(
     author="Nils Naumann",
     author_email="nils.naumann02@gmail.com",
     packages=find_packages(),
-    install_requires=[],
-    package_data={
-        "pymongex": [
-            "motor==3.5.1",
-            "pymongo[srv]==4.8.0",
-            "pydantic==2.8.2",
-        ]
-    },
+    install_requires=[
+        "motor==3.5.1",
+        "pymongo[srv]==4.8.0",
+        "pydantic==2.8.2",
+    ],
 )
