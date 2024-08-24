@@ -79,9 +79,9 @@ class DataModel(BaseModel):
         elif issubclass(field_type, BaseEnum):
             return field_type(value).value
         # check if field type is PyObjectId -> convert to ObjectId
-        elif field_type == ObjectId or field_type == PyObjectId:
+        elif field_type is ObjectId or field_type is PyObjectId:
             return ObjectId(value)
-        elif field_type == dt:
+        elif field_type is dt:
             return dt.fromisoformat(value)
         else:
             raise ValueError(f"Unsupported field type: {field_type}")
