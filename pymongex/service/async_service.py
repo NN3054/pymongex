@@ -1,4 +1,4 @@
-from typing import Any, List, Type, Union
+from typing import Any, List, Optional, Type, Union
 
 from bson import ObjectId
 from pydantic import BaseModel
@@ -19,25 +19,51 @@ class AsyncBaseService(BaseService):
 
     @classmethod
     async def create_one(
-        cls, document: Union[dict, InCollectionModel, BaseModel]
+        cls,
+        document: Union[dict, InCollectionModel, BaseModel],
+        expand: list[str] = None,
     ) -> OutCollectionModel:
         inserted_id = await cls._mongo_client.insert_one(cls._in_model, document)
-        return await cls.get_by_id(inserted_id)
+        return await cls.get_by_id(
+            inserted_id,
+            expand=expand,
+        )
 
     @classmethod
     async def create_many(
-        cls, documents: List[Union[dict, InCollectionModel, BaseModel]]
-    ):
+        cls,
+        documents: List[Union[dict, InCollectionModel, BaseModel]],
+        expand: list[str] = None,
+    ) -> List[OutCollectionModel]:
         inserted_ids = await cls._mongo_client.insert_many(cls._in_model, documents)
-        return await cls.get_by_ids(inserted_ids)
+        return await cls.get_by_ids(
+            inserted_ids,
+            expand=expand,
+        )
 
     @classmethod
-    async def get_one(cls, query: dict = {}):
-        return await cls._mongo_client.find_one(cls._out_model, query)
+    async def get_one(
+        cls,
+        query: dict = {},
+        sort: dict = None,
+        expand: list[str] = None,
+        skip: int = 0,
+    ) -> Optional[OutCollectionModel]:
+        return await cls._mongo_client.find_one(
+            cls._out_model,
+            query,
+            sort=sort,
+            expand=expand,
+            skip=skip,
+        )
 
     @classmethod
-    async def get_by_id(cls, id: Union[str, ObjectId]) -> OutCollectionModel:
-        return await cls.get_one({"_id": ObjectId(id)})
+    async def get_by_id(
+        cls,
+        id: Union[str, ObjectId],
+        expand: list[str] = None,
+    ) -> Optional[OutCollectionModel]:
+        return await cls.get_one({"_id": ObjectId(id)}, expand=expand)
 
     @classmethod
     async def get_many(
@@ -59,35 +85,56 @@ class AsyncBaseService(BaseService):
 
     @classmethod
     async def get_by_ids(
-        cls, ids: List[Union[str, ObjectId]]
+        cls,
+        ids: List[Union[str, ObjectId]],
+        sort: dict = None,
+        skip: int = 0,
+        limit: int = None,
+        expand: List[str] = None,
     ) -> List[OutCollectionModel]:
-        return await cls.get_many({"_id": {"$in": [ObjectId(id) for id in ids]}})
+        return await cls.get_many(
+            {"_id": {"$in": [ObjectId(id) for id in ids]}},
+            sort=sort,
+            skip=skip,
+            limit=limit,
+            expand=expand,
+        )
 
     @classmethod
     async def update_one(
         cls,
         query: dict,
         update: Union[dict, BaseModel],
+        expand: list[str] = None,
     ) -> OutCollectionModel:
         update = cls._prepare_update(update)
-        await cls._mongo_client.update_one(cls._in_model, query, update)
-        return await cls.get_one(query)
+        cls._mongo_client.update_one(cls._in_model, query, update)
+        return await cls.get_one(query, expand=expand)
 
     @classmethod
     async def update(
-        cls, model: InCollectionModel, update: Union[dict, BaseModel]
+        cls,
+        model: InCollectionModel,
+        update: Union[dict, BaseModel],
+        expand: list[str] = None,
     ) -> OutCollectionModel:
-        return await cls.update_one({"_id": model.id}, update)
+        return await cls.update_one(
+            {"_id": model.id},
+            update,
+            expand=expand,
+        )
 
     @classmethod
     async def update_by_id(
         cls,
         id: Union[str, ObjectId],
         update: Union[dict, BaseModel],
+        expand: list[str] = None,
     ) -> OutCollectionModel:
         return await cls.update_one(
             {"_id": ObjectId(id)},
             update,
+            expand=expand,
         )
 
     @classmethod
@@ -95,21 +142,31 @@ class AsyncBaseService(BaseService):
         cls,
         query: dict,
         update: Union[dict, BaseModel],
+        expand: list[str] = None,
     ) -> List[OutCollectionModel]:
         update = cls._prepare_update(update)
-        await cls._mongo_client.update_many(cls._in_model, query, update)
-        return await cls.get_many(query)
+        cls._mongo_client.update_many(cls._in_model, query, update)
+        return await cls.get_many(
+            query,
+            expand=expand,
+        )
 
     @classmethod
     async def update_by_ids(
         cls,
         ids: List[Union[str, ObjectId]],
         update: Union[dict, BaseModel],
+        expand: list[str] = None,
     ) -> List[OutCollectionModel]:
         return await cls.update_many(
             {"_id": {"$in": [ObjectId(id) for id in ids]}},
             update,
+            expand=expand,
         )
+
+    @classmethod
+    async def delete(cls, model: OutCollectionModel) -> int:
+        return await cls.delete_by_id(model.id)
 
     @classmethod
     async def delete_one(cls, query: dict) -> int:
