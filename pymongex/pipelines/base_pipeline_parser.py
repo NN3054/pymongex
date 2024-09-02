@@ -2,15 +2,12 @@ import json
 import os
 from typing import Any, List
 
-from devtools import debug
-
 
 class BasePipelineParser:
 
     def __init__(self, __file__) -> None:
         self.this_dir = os.path.dirname(os.path.realpath(__file__))
         self.pipelines_fp = os.path.join(self.this_dir, "pipelines.json")
-        debug(self.pipelines_fp)
 
     def _read_raw_pipeline(self, pipeline_name: str) -> List[dict]:
         with open(self.pipelines_fp, "r") as f:
