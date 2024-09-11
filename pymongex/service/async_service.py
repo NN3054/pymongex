@@ -108,7 +108,7 @@ class AsyncBaseService(BaseService):
         expand: list[str] = None,
     ) -> OutCollectionModel:
         update = cls._prepare_update(update)
-        cls._mongo_client.update_one(cls._in_model, query, update)
+        await cls._mongo_client.update_one(cls._in_model, query, update)
         return await cls.get_one(query, expand=expand)
 
     @classmethod
@@ -145,7 +145,7 @@ class AsyncBaseService(BaseService):
         expand: list[str] = None,
     ) -> List[OutCollectionModel]:
         update = cls._prepare_update(update)
-        cls._mongo_client.update_many(cls._in_model, query, update)
+        await cls._mongo_client.update_many(cls._in_model, query, update)
         return await cls.get_many(
             query,
             expand=expand,
