@@ -114,13 +114,12 @@ class AsyncBaseService(BaseService):
     @classmethod
     async def update(
         cls,
-        model: InCollectionModel,
-        update: Union[dict, BaseModel],
+        model: OutCollectionModel,
         expand: list[str] = None,
     ) -> OutCollectionModel:
         return await cls.update_one(
             {"_id": model.id},
-            update,
+            model.model_dump(),
             expand=expand,
         )
 
